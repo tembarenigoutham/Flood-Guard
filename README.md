@@ -1,4 +1,4 @@
-<img width="1645" height="864" alt="image" src="https://github.com/user-attachments/assets/1ffcff3c-3062-4c43-81e9-bf5c188f950b" /># 🌊 Flood Guard – Flood Risk Monitoring & Early Warning System
+Risk Monitoring & Early Warning System
 
 🚀 **Developed for Hackathon Project**  
 🌱 **Domain:** Sustainability & Disaster Management  
