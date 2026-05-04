@@ -1,4 +1,4 @@
-# 🌊 Flood Guard – Flood Risk Monitoring & Early Warning System
+<img width="1645" height="864" alt="image" src="https://github.com/user-attachments/assets/1ffcff3c-3062-4c43-81e9-bf5c188f950b" /># 🌊 Flood Guard – Flood Risk Monitoring & Early Warning System
 
 🚀 **Developed for Hackathon Project**  
 🌱 **Domain:** Sustainability & Disaster Management  
@@ -103,13 +103,15 @@ FloodGuard/
 ## 🖼 Screenshots
 
 ### Citizen Dashboard
-<img width="100%" alt="Citizen Dashboard" src="YOUR_SCREENSHOT_LINK">
+<img width="1645" height="864" alt="image" src="https://github.com/user-attachments/assets/75f9626f-6fb6-41c7-9bde-fb5437a1c4e8" />
 
 ### Flood Alert System
-<img width="100%" alt="Flood Alerts" src="YOUR_SCREENSHOT_LINK">
+<img width="1667" height="873" alt="image" src="https://github.com/user-attachments/assets/f4acb445-9055-40e1-a603-468457be37f8" />
+
 
 ### Command Center
-<img width="100%" alt="Command Center" src="YOUR_SCREENSHOT_LINK">
+<img width="1663" height="877" alt="image" src="https://github.com/user-attachments/assets/1be0ae9e-64e0-4592-ab95-c5e6463d55b0" />
+
 
 ---
 
