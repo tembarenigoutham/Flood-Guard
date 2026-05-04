@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alerts - Flood Risk Monitoring</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <i class="fa-solid fa-water"></i> FloodGuard
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="input.html">Input Data</a>
+      <a href="alerts.html" class="active">Alerts</a>
+      <a href="emergency.html">Emergency Info</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h1 class="page-title">System Alerts</h1>
+      <p class="page-subtitle">Track historical warnings and view current risk zones.</p>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- High Risk Areas -->
+      <div class="glass-card">
+        <h3 class="card-title">High-Risk Coverage Areas</h3>
+        <ul class="list-group">
+          <li class="list-item">
+            <div class="item-info">
+              <h4>Sector 4, River Basin</h4>
+              <p>Proximity: 200m from banks</p>
+            </div>
+            <span class="badge badge-red">Active Watch</span>
+          </li>
+          <li class="list-item">
+            <div class="item-info">
+              <h4>Downtown Lowlands</h4>
+              <p>Drainage capacity: 75% utilized</p>
+            </div>
+            <span class="badge badge-red">At Risk</span>
+          </li>
+          <li class="list-item">
+            <div class="item-info">
+              <h4>East Valley Settlements</h4>
+              <p>Elevation: -5m</p>
+            </div>
+            <span class="badge badge-green">Safe</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Alert History -->
+      <div class="glass-card" style="grid-column: span 2 / auto;">
+        <h3 class="card-title">Alert History</h3>
+        <ul class="list-group" id="alert-list">
+          <p style="color: var(--text-muted); text-align: center; padding: 2rem;">Loading history...</p>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Historical Data Section -->
+    <div class="dashboard-grid" style="margin-top: 1.5rem;">
+      <div class="glass-card" style="grid-column: span 2 / auto;">
+        <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Real-World Historical Data (Last 5-10 Years)</h3>
+        <ul class="list-group">
+          <li class="list-item">
+            <div class="item-info">
+              <h4 style="color: var(--risk-high);">2023 North India Floods</h4>
+              <p>Affecting Himachal Pradesh, Punjab & Delhi. Caused by heavy monsoon rains and overflowing Yamuna river.</p>
+            </div>
+            <span class="badge badge-red">Major Impact</span>
+          </li>
+          <li class="list-item">
+            <div class="item-info">
+              <h4 style="color: var(--risk-high);">2020 Assam & Bihar Floods</h4>
+              <p>Brahmaputra river overflowed impacting over 5 million people across 30 districts in Assam.</p>
+            </div>
+            <span class="badge badge-red">Major Impact</span>
+          </li>
+          <li class="list-item">
+            <div class="item-info">
+              <h4 style="color: var(--risk-high);">2018 Kerala Floods</h4>
+              <p>Worst flooding in a century. Extremely heavy rainfall caused all 14 districts to be placed on red alert simultaneously.</p>
+            </div>
+            <span class="badge badge-red">Major Impact</span>
+          </li>
+          <li class="list-item">
+            <div class="item-info">
+              <h4 style="color: var(--risk-medium);">2015 Chennai Floods</h4>
+              <p>Unprecedented rainfall resulted in devastating flooding across Coromandel Coast.</p>
+            </div>
+            <span class="badge badge-red">Major Impact</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const state = floodApp.loadState();
+      const list = document.getElementById('alert-list');
+      
+      list.innerHTML = '';
+      
+      if (state.alerts && state.alerts.length > 0) {
+        state.alerts.forEach(alert => {
+          const li = document.createElement('li');
+          li.className = 'list-item';
+          li.innerHTML = `
+            <div class="item-info" style="width: 100%;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <h4 style="color: var(--risk-high);"><i class="fa-solid fa-triangle-exclamation"></i> ${alert.date} - ${alert.time}</h4>
+              </div>
+              <p>${alert.message}</p>
+            </div>
+          `;
+          list.appendChild(li);
+        });
+      } else {
+        list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No critical alerts recorded recently.</p>';
+      }
+    });
+  </script>
+</body>
+</html>

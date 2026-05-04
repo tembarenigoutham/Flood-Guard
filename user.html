@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Citizen Dashboard - FloodGuard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><i class="fa-solid fa-water"></i> FloodGuard | Citizen Portal</div>
+    <div class="nav-links">
+      <span style="color:var(--text-muted)">Welcome, <span id="userNameDisp" style="color:white;font-weight:bold;">User</span></span>
+      <a href="index.html" style="background: rgba(255,255,255,0.1);">Logout</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Global Alert Row -->
+    <div class="glass-card" style="margin-bottom: 2rem; background: var(--glass-bg); text-align: center; padding: 1rem;" id="alertBox">
+       <h3 style="margin:0;"><i class="fa-solid fa-tower-cell"></i> COMMAND ALERT STATUS: <span id="alertStatus" style="color:var(--risk-low);">NORMAL</span></h3>
+    </div>
+
+    <div class="dashboard-grid" style="grid-template-columns: 1fr 1fr;">
+      
+      <!-- Interactive Region -->
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        
+        <div class="glass-card">
+           <h3 class="card-title">Emergency Rescue System</h3>
+           <p style="color:var(--text-muted); margin-bottom: 1rem;">If you are trapped by flood water or in imminent danger, activate your SOS beacon. It will instantly broadcast your live GPS coordinates to Command and nearby Rescue Units.</p>
+           
+           <div id="sosActionArea">
+             <button onclick="triggerSOS()" class="btn btn-primary" style="background: var(--risk-high); height: 80px; width: 100%; font-size: 1.5rem; text-transform: uppercase; animation: pulse 2s infinite;">
+               <i class="fa-solid fa-truck-medical"></i> REQUEST EMERGENCY RESCUE
+             </button>
+           </div>
+        </div>
+
+        <div class="glass-card">
+          <h3 class="card-title">Safe Zones & Navigation</h3>
+          <p style="color:var(--text-muted); font-size: 0.9rem;">
+             Nearest safe zones:<br><br>
+             1. <i class="fa-solid fa-school"></i> Central Gov School (1.2km) <span class="badge badge-green">Open</span><br><br>
+             2. <i class="fa-solid fa-building-shield"></i> Sector 4 Police Hub (3.5km) <span class="badge badge-green">Open</span>
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Local Map -->
+      <div class="glass-card" style="display:flex; flex-direction:column;">
+        <h3 class="card-title">Live Area Map</h3>
+        <div id="map" style="flex:1; min-height: 350px; border-radius: 8px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    const me = sessionStorage.getItem('userName') || 'Citizen-X';
+    document.getElementById('userNameDisp').textContent = me;
+
+    // Simulate their location somewhere in India
+    const myLat = 26.2 + (Math.random() - 0.5)*0.5;
+    const myLng = 92.9 + (Math.random() - 0.5)*0.5;
+
+    // Map Setup
+    const map = L.map('map').setView([myLat, myLng], 12);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+    
+    // Custom Location Marker to fix broken image links
+    const userIcon = L.divIcon({
+        className: 'custom-pin',
+        html: '<i class="fa-solid fa-location-dot fa-bounce" style="color:#3b82f6; font-size:32px; filter: drop-shadow(0 0 10px rgba(59,130,246,0.8));"></i>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+    });
+    
+    const myMarker = L.marker([myLat, myLng], {icon: userIcon}).addTo(map).bindPopup("<b>Your Current Location</b>");
+
+    // Force map to resize correctly within the grid (fixes grey map bug)
+    setTimeout(() => { map.invalidateSize(); }, 300);
+
+    // Update UI based on DB state
+    window.onDbUpdate = function(state) {
+      // 1. Global Alert
+      const alertEl = document.getElementById('alertStatus');
+      const box = document.getElementById('alertBox');
+      alertEl.textContent = state.globalAlert.toUpperCase();
+      if(state.globalAlert === 'Critical') {
+        alertEl.style.color = 'var(--risk-high)';
+        box.style.border = '2px solid var(--risk-high)';
+        box.style.background = 'var(--risk-high-bg)';
+      } else if (state.globalAlert === 'Moderate') {
+        alertEl.style.color = 'var(--risk-medium)';
+        box.style.border = '2px solid var(--risk-medium)';
+        box.style.background = 'var(--risk-medium-bg)';
+      } else {
+        alertEl.style.color = 'var(--risk-low)';
+        box.style.border = '1px solid var(--glass-border)';
+        box.style.background = 'var(--glass-bg)';
+      }
+
+      // 2. SOS Tracker
+      const mySOS = state.sosRequests.find(s => s.userName === me);
+      const actionArea = document.getElementById('sosActionArea');
+
+      if(!mySOS) {
+         actionArea.innerHTML = `<button onclick="triggerSOS()" class="btn btn-primary" style="background: var(--risk-high); height: 80px; width: 100%; font-size: 1.5rem; animation: pulse 2s infinite;"><i class="fa-solid fa-truck-medical"></i> REQUEST EMERGENCY RESCUE</button>`;
+      } else if(mySOS.status === 'pending') {
+         actionArea.innerHTML = `<div style="padding:1rem; border:2px solid var(--risk-medium); border-radius:8px; text-align:center;">
+           <h3 style="color:var(--risk-medium); margin-bottom:0.5rem;"><i class="fa-solid fa-spinner fa-spin"></i> SOS BROADCASTING</h3>
+           <p style="color:var(--text-muted); font-size:0.9rem;">Command Center has received your signal. Searching for nearest Rescue Unit...</p>
+         </div>`;
+      } else if(mySOS.status === 'assigned') {
+         actionArea.innerHTML = `<div style="padding:1rem; border:2px solid var(--risk-low); border-radius:8px; background:var(--risk-low-bg); text-align:center;">
+           <h3 style="color:var(--risk-low); margin-bottom:0.5rem;"><i class="fa-solid fa-helicopter"></i> RESCUE EN ROUTE</h3>
+           <p style="color:#fff; font-size:1rem;">Unit <b>${mySOS.workerName}</b> is navigating to your coordinates. Stay in place.</p>
+         </div>`;
+      } else if(mySOS.status === 'rescued') {
+         actionArea.innerHTML = `<div style="padding:1rem; border:2px solid #3b82f6; border-radius:8px; text-align:center;">
+           <h3 style="color:#3b82f6; margin-bottom:0.5rem;"><i class="fa-solid fa-check-circle"></i> RESCUE COMPLETE</h3>
+           <p style="color:var(--text-muted); font-size:0.9rem;">You have been marked safe at a designated shelter. <a href="#" onclick="db.resetSystem()">Clear Session</a></p>
+         </div>`;
+      }
+    };
+
+    function triggerSOS() {
+      db.createSOS(me, myLat, myLng);
+    }
+
+    // Init
+    window.onDbUpdate(db.get());
+
+  </script>
+</body>
+</html>

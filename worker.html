@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Worker Dashboard - FloodGuard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><i class="fa-solid fa-truck-medical"></i> NDRF Dispatch Terminal</div>
+    <div class="nav-links">
+      <span style="color:var(--text-muted)">Unit Call Sign: <span id="workerNameDisp" style="color:white;font-weight:bold;">Worker</span></span>
+      <a href="index.html" style="background: rgba(255,255,255,0.1);">Logout</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h1 class="page-title">Active Response Queue</h1>
+      <p class="page-subtitle">Accept assignments and navigate to citizens in distress.</p>
+    </div>
+
+    <!-- Active SOS Queue -->
+    <div class="glass-card" style="margin-bottom:2rem;">
+      <h3 class="card-title">Incoming Dispatches (Pending)</h3>
+      <ul class="list-group" id="pendingQueue">
+        <p style="color: var(--text-muted); padding: 1rem;">Loading dispatches...</p>
+      </ul>
+    </div>
+
+    <!-- My Assignments -->
+    <div class="glass-card" style="border: 1px solid var(--risk-low);">
+      <h3 class="card-title" style="color: var(--risk-low);"><i class="fa-solid fa-helicopter"></i> My Active Deployments</h3>
+      <ul class="list-group" id="myQueue">
+        <p style="color: var(--text-muted); padding: 1rem;">No active deployments.</p>
+      </ul>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    const me = sessionStorage.getItem('workerName') || 'Unit-Omega';
+    document.getElementById('workerNameDisp').textContent = me;
+
+    window.onDbUpdate = function(state) {
+      const pendingList = document.getElementById('pendingQueue');
+      const myList = document.getElementById('myQueue');
+      
+      pendingList.innerHTML = '';
+      myList.innerHTML = '';
+
+      let hasPending = false;
+      let hasMine = false;
+
+      state.sosRequests.forEach(req => {
+        if(req.status === 'pending') {
+          hasPending = true;
+          pendingList.innerHTML += `
+            <li class="list-item" style="background: rgba(239, 68, 68, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid var(--risk-high);">
+              <div class="item-info">
+                <h4><i class="fa-solid fa-person-drowning" style="color: var(--risk-high);"></i> SOS: Citizen ${req.userName}</h4>
+                <p>Coordinates: [${req.lat.toFixed(4)}, ${req.lng.toFixed(4)}] | Dist: ~${(Math.random()*5+1).toFixed(1)} km</p>
+              </div>
+              <button class="btn btn-primary" onclick="db.acceptSOS('${req.id}', '${me}')"><i class="fa-solid fa-truck-arrow-right"></i> Accept Mission</button>
+            </li>
+          `;
+        } else if(req.status === 'assigned' && req.workerName === me) {
+          hasMine = true;
+          myList.innerHTML += `
+            <li class="list-item" style="background: rgba(16, 185, 129, 0.05); padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem; border-left: 4px solid var(--risk-low);">
+              <div class="item-info">
+                <h4 style="color: var(--risk-low);">EN ROUTE TO: ${req.userName}</h4>
+                <p>Navigating to: [${req.lat.toFixed(4)}, ${req.lng.toFixed(4)}]</p>
+              </div>
+              <div>
+                 <button class="btn btn-primary" style="background:var(--risk-low);" onclick="db.resolveSOS('${req.id}')"><i class="fa-solid fa-check"></i> Mark Rescued</button>
+              </div>
+            </li>
+          `;
+        }
+      });
+
+      if(!hasPending) pendingList.innerHTML = '<p style="color: var(--text-muted); padding: 1rem;">No civilians currently require immediate assistance in your sector.</p>';
+      if(!hasMine) myList.innerHTML = '<p style="color: var(--text-muted); padding: 1rem;">You are on standby.</p>';
+    };
+
+    window.onDbUpdate(db.get());
+  </script>
+</body>
+</html>

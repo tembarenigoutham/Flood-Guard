@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Data - Flood Risk Monitoring</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <i class="fa-solid fa-water"></i> FloodGuard
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Dashboard</a>
+      <a href="input.html" class="active">Input Data</a>
+      <a href="alerts.html">Alerts</a>
+      <a href="emergency.html">Emergency Info</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <h1 class="page-title">Data Simulation</h1>
+      <p class="page-subtitle">Submit new readings to observe system response.</p>
+    </div>
+
+    <div style="max-width: 600px; margin: 0 auto;">
+      <div class="glass-card">
+        <h3 class="card-title">Enter Station Data</h3>
+        <form id="dataForm">
+          <div class="form-group">
+            <label for="waterLevel">Water Level (m)</label>
+            <input type="number" step="0.1" id="waterLevel" class="form-control" placeholder="e.g. 5.5" required>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">Thresholds: >5m (Med), >8m (High)</p>
+          </div>
+          
+          <div class="form-group">
+            <label for="rainfall">Rainfall (mm)</label>
+            <input type="number" step="1" id="rainfall" class="form-control" placeholder="e.g. 80" required>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem;">Thresholds: >100mm (combined with water >8m for High)</p>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+            <i class="fa-solid fa-satellite-dish"></i> Upload Data
+          </button>
+        </form>
+      </div>
+      
+      <div class="glass-card" style="margin-top: 1.5rem; border-color: rgba(59, 130, 246, 0.3);">
+        <h3 class="card-title"><i class="fa-solid fa-circle-info" style="color: var(--primary)"></i> System Rules</h3>
+        <ul style="color: var(--text-muted); font-size: 0.95rem; margin-left: 1.5rem;">
+          <li style="margin-bottom: 0.5rem;"><strong>High Risk:</strong> Water > 8m AND Rainfall > 100mm</li>
+          <li style="margin-bottom: 0.5rem;"><strong>Medium Risk:</strong> Water > 5m</li>
+          <li><strong>Low Risk:</strong> Normal parameters</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('dataForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const water = document.getElementById('waterLevel').value;
+      const rain = document.getElementById('rainfall').value;
+      
+      // Update state
+      floodApp.addDataPoint(water, rain);
+      
+      // Redirect to dashboard to observe changes
+      window.location.href = 'index.html';
+    });
+    
+    // Pre-fill with current state
+    document.addEventListener('DOMContentLoaded', () => {
+      const state = floodApp.loadState();
+      document.getElementById('waterLevel').value = state.currentWaterLevel;
+      document.getElementById('rainfall').value = state.currentRainfall;
+    });
+  </script>
+</body>
+</html>
